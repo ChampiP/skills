@@ -1,20 +1,20 @@
 ---
 name: use-obsinotes
-description: Use Brayan's Obsidian vault at ~/git-hub/ObsiNotes as a source of project/client context, or help organize it. Trigger this whenever Brayan is working in ANY repo/project and asks you to check "mi obsidian", "mi vault", or needs background/context on a client project (TBWA, Sellly, ANKA, corfid, Farma, Depilab, Emove, HPG, Nogalia, Tukompa) — meeting notes, decisions, and requirements usually live there even when you're not currently inside that folder. Also trigger for "organiza/limpia/ordena mi obsidian" or questions about how the vault, its plugins, or its automations work. Do NOT assume which vault "mi obsidian" means if it could also refer to ~/git-hub/Obsidian_coorpi (a separate personal-assistant memory vault) — ask if unclear.
+description: Use Brayan's Obsidian vault at ~/git-hub/obsidian/ObsiNotes as a source of project/client context, or help organize it. Trigger this whenever Brayan is working in ANY repo/project and asks you to check "mi obsidian", "mi vault", or needs background/context on a client project (TBWA, Sellly, ANKA, corfid, Farma, Depilab, Emove, HPG, Nogalia, Tukompa) — meeting notes, decisions, and requirements usually live there even when you're not currently inside that folder. Also trigger for "organiza/limpia/ordena mi obsidian" or questions about how the vault, its plugins, or its automations work. Do NOT assume which vault "mi obsidian" means if it could also refer to ~/git-hub/obsidian/Obsidian_coorpi (a separate personal-assistant memory vault) — ask if unclear.
 ---
 
 # Usar / organizar ObsiNotes
 
-`~/git-hub/ObsiNotes` es el vault de Obsidian de Brayan: contexto de proyectos de
+`~/git-hub/obsidian/ObsiNotes` es el vault de Obsidian de Brayan: contexto de proyectos de
 cliente (Holinsys), proyectos personales y aprendizaje técnico. El vault tiene su
 propio `AGENTS.md` en la raíz — **léelo primero**, ahí está la estructura completa,
 el mapeo proyecto→cliente, las automatizaciones y las reglas de organización. Este
 SKILL.md es solo el gancho para que Claude Code lo recuerde desde cualquier sesión;
-no dupliques ahí — mantenlo a `~/git-hub/ObsiNotes/AGENTS.md` como fuente de verdad.
+no dupliques ahí — mantenlo a `~/git-hub/obsidian/ObsiNotes/AGENTS.md` como fuente de verdad.
 
 ## Vault hermano — desambiguar antes de actuar
 
-También existe `~/git-hub/Obsidian_coorpi` (memoria del asistente personal
+También existe `~/git-hub/obsidian/Obsidian_coorpi` (memoria del asistente personal
 "Coorpi" de Brayan, con su propio `AGENTS.md` y protocolos). Es un sistema
 deliberadamente separado. Si Brayan dice "revisa mi obsidian" sin más contexto
 y no es obvio cuál de los dos vaults necesita, **pregunta**. Pista: mencionar
@@ -28,7 +28,7 @@ prohibido, solo un sistema distinto con sus propias reglas.
 Ejemplo: Brayan está en el código de TBWA y dice "revisa mi obsidian, ahí está
 el contexto de este proyecto".
 
-1. Ve a `~/git-hub/ObsiNotes/AGENTS.md`, sección "Mapeo proyecto → cliente"
+1. Ve a `~/git-hub/obsidian/ObsiNotes/AGENTS.md`, sección "Mapeo proyecto → cliente"
    para ubicar la carpeta correcta en `02_Areas/Holinsys/01_Projects/<Proyecto>/`
    (o `02_Areas/Personal/<Área>/` si es personal).
 2. Lee la nota-hub `<Proyecto>.md` y sus notas enlazadas.
@@ -41,7 +41,7 @@ el contexto de este proyecto".
 ## Caso 2: te piden organizar/limpiar el vault
 
 Sigue el procedimiento de la sección "Cómo se organiza" en
-`~/git-hub/ObsiNotes/AGENTS.md`. Resumen de los puntos que no son obvios:
+`~/git-hub/obsidian/ObsiNotes/AGENTS.md`. Resumen de los puntos que no son obvios:
 
 - Reuniones "(Sin clasificar)": clasifica comparando participantes/tema contra
   proyectos existentes, no muevas de carpeta, solo renombra + actualiza
