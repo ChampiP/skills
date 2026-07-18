@@ -5,7 +5,8 @@ description: Gustos y preferencias de Brayan para configurar su escritorio Cachy
 
 # Preferencias de entorno y de colaboración de Brayan
 
-Esta skill resume decisiones **ya tomadas** sobre su PC (CachyOS + KDE Plasma 6,
+Esta skill resume decisiones **ya tomadas** sobre su PC (CachyOS; escritorio
+principal **Hyprland** desde jul-2026, KDE Plasma 6 como secundario;
 kitty + fish/zsh) para que cualquier sesión futura de Claude Code parta del
 mismo punto, en vez de proponer desde cero cosas que Brayan ya probó y aceptó
 o rechazó. El repo con los archivos de config reales es
@@ -80,6 +81,59 @@ que lo pida de nuevo.
   largos.
 - **KDE Connect**: instalado; falta emparejar el celular (posible bloqueo
   por aislamiento de clientes AP en el router — fuera del control del PC).
+
+## Hyprland — su escritorio principal (desde jul-2026)
+
+Brayan **se pasó a Hyprland** como escritorio principal (mantiene KDE Plasma
+como sesión secundaria, la razón del cambio: Plasma no le deja personalizar
+tanto la barra superior — iconos, calendario, temperatura). Config modular de
+**CachyOS Hyprland** en `~/.config/hypr/` (`hyprland.conf` + `config/*.conf`).
+**No está en git** — hacer backup antes de editar (hay backups manuales en
+`~/.config/hypr-backup-manual/`). Estética objetivo: **macOS pero abierto**.
+
+Decisiones ya tomadas (no reproponer desde cero):
+- **Estilo macOS**: tema GTK **WhiteSur-Dark** + iconos **WhiteSur-dark**
+  (alinear también `gsettings`, no solo los `settings.ini`). Decoraciones:
+  rounding 10, sombras suaves, blur. Botones de ventana estilo mac
+  (`icon:minimize,maximize,close`).
+- **Dock**: `nwg-dock-hyprland` inferior, **auto-oculto por hotspot** (flag
+  `-d`; OJO: el flag `-r` lo deja fijo SIN ocultarse — no usar `-r`), fondo
+  **transparente con solo marco** (editado en `~/.config/nwg-dock-hyprland/style.css`),
+  lanzador = `nwg-drawer` (Launchpad). Apps ancladas en `~/.config/nwg-dock-hyprland/pinned`.
+- **Rechazó el agrupado en "cuadros"** (window groups / `group set`): prefiere
+  **pantallas divididas** (dwindle split). No volver a meter reglas `group set`.
+- **Alt+Tab** para cambiar ventanas (no venía mapeado; `Super+Tab` es para grupos).
+  Atajos suyos: `Super+W` = WhatsApp (ZapZap), `Super+N` = Obsidian.
+- **Autostart determinista por workspace** (en `config/autostart.conf` +
+  reglas `workspace N silent` en `windowrules.conf`): WS1 Brave+terminal,
+  WS2 Cursor+Claude, WS3 Obsidian, WS4 Postman+DataGrip, WS5 WhatsApp.
+  Hyprland **no** guarda sesión (posiciones exactas) de forma nativa — se le
+  explicó; el enfoque aceptado es "cada app siempre en su workspace".
+- **Sesión de login**: dejar solo **Hyprland** (plain, no `hyprland-uwsm` —
+  se ocultó con `Hidden=true`) + **Plasma**. DM = `plasmalogin`.
+- **Barra superior (waybar)**: la quería **más delgada** (bajado font-size a
+  12px + menos padding en `~/.config/waybar/style.css`).
+- **WhatsApp = ZapZap** (`com.rtosta.zapzap`, class `zapzap`). **Rechazado
+  `whatsapp-for-linux`** porque arrastra compilar `webkit2gtk` 4.0 (horas).
+- **Notificaciones = mako** estilizado tipo macOS (`~/.config/mako/config`):
+  fondo azul oscuro translúcido, rounding 16, colores por urgencia/app
+  (Gmail rojo, Calendar azul, WhatsApp verde, música celeste).
+
+## Notificaciones Gmail (goimapnotify) — funcionando desde jul-2026
+
+- Cuenta monitoreada: **champibrayan14@gmail.com** (Gmail personal; NO el de
+  Workspace `@holinsys.net`). Usa **app password** de Google guardada en
+  `~/.config/goimapnotify/folders/*.yaml` (permisos 600).
+- **Un servicio por carpeta** (plantilla `goimapnotify@.service`, instancias
+  por etiqueta): INBOX, Bancos, Empleo, Estudios, News, Reuniones, Seguridad,
+  Trabajo. Cada aviso dice la carpeta. Razón del diseño: la versión 2.5.5 solo
+  acepta formato plano (boxes = strings, un `onNewMail`); para tener el nombre
+  de la carpeta se corre una instancia por carpeta pasándolo como argumento.
+- **Google Calendar**: PENDIENTE (requiere OAuth propio en Google Cloud con
+  `gcalcli`, ~10 min de setup del usuario).
+- **Idea futura de Brayan**: armar una **base de datos de finanzas** parseando
+  los correos de la carpeta **Bancos** (IMAP → parser/LLM Groq → Supabase o
+  SQLite → dashboard). Enlaza con su proyecto `finanzas-personales` de Coorpi.
 
 ## Cómo le gusta que trabajemos
 
