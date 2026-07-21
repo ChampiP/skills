@@ -1,0 +1,9 @@
+[Unit]
+Description=Engram: sync de memoria por chunks (pull+import+export+push) contra GitHub
+
+[Service]
+Type=oneshot
+Environment=ENGRAM_DATA_DIR=%h/.engram
+Environment=ENGRAM_SYNC_DIR=%h/.engram-sync
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.local/bin/engram-sync.sh
