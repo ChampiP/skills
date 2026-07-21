@@ -46,9 +46,11 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 1. Confirmar engram instalado y acceso SSH al repo privado (ver official-docs).
 2. Si la DB está corrupta, ejecutar `references/recovery.md` completo antes de seguir.
 3. Ejecutar la guía del OS correspondiente (setup-linux / setup-windows): clonar repo
-   de sync, instalar script, primer sync, y programar el scheduler.
-4. Blindar `~/.engram` si contiene un clon de código (untrack binario + memoria).
-5. Validar (Output Contract) antes de dar por terminado.
+   de sync, instalar script, primer sync, y programar los disparadores.
+4. Programar los 3 disparadores (ver `references/sync-timing.md`): pull al iniciar,
+   push cada 10 min, y push al apagar (Linux best-effort). No dejar solo el periódico.
+5. Blindar `~/.engram` si contiene un clon de código (untrack binario + memoria).
+6. Validar (Output Contract) antes de dar por terminado.
 
 ## Output Contract
 El setup está completo sólo si TODO esto se cumple:
@@ -64,7 +66,9 @@ El setup está completo sólo si TODO esto se cumple:
 ## References
 - `references/setup-linux.md` — setup Linux/macOS de cero.
 - `references/setup-windows.md` — setup Windows de cero.
+- `references/sync-timing.md` — cuándo corre el sync, qué se pierde y qué no, y cómo bajar la ventana.
 - `references/recovery.md` — recuperar un `engram.db` corrupto.
 - `references/official-docs.md` — doc oficial de Engram y comandos verificados.
 - `assets/engram-sync.sh`, `assets/engram-sync.ps1` — scripts de sync (genéricos).
-- `assets/engram-sync.service`, `assets/engram-sync.timer` — unidades systemd.
+- `assets/engram-sync.service`, `assets/engram-sync.timer`,
+  `assets/engram-sync-shutdown.service` — unidades systemd (periódico + push al apagar).

@@ -24,12 +24,20 @@ powershell -NoProfile -File "$HOME\.engram-sync\engram-sync.ps1"
 engram sync --status     # debe mostrar "Pending import: 0"
 ```
 
-## 4. Automatizar cada hora (Task Scheduler)
+## 4. Automatizar (Task Scheduler): al iniciar sesión + cada 10 min
+Dos tareas: una pulea al loguearte (trae cambios de la otra PC), otra pushea seguido
+(reduce la ventana de pérdida si apagás la PC).
 ```powershell
-schtasks /create /tn "EngramSync" /sc hourly /mo 1 `
-  /tr "powershell -NoProfile -WindowStyle Hidden -File %USERPROFILE%\.engram-sync\engram-sync.ps1"
-# Correr a mano: schtasks /run /tn EngramSync
+$cmd = "powershell -NoProfile -WindowStyle Hidden -File %USERPROFILE%\.engram-sync\engram-sync.ps1"
+# a) pull/sync al iniciar sesion
+schtasks /create /tn "EngramSyncLogon"    /sc onlogon        /tr $cmd
+# b) sync cada 10 minutos
+schtasks /create /tn "EngramSyncPeriodic" /sc minute /mo 10  /tr $cmd
+# Correr a mano: schtasks /run /tn EngramSyncPeriodic
 ```
+Push-al-apagar en Windows es más complejo (no hay trigger simple de shutdown para
+tareas de usuario); el intervalo de 10 min + el sync al login cubren el caso. Ver
+`references/sync-timing.md`.
 
 ## 5. Blindar si engram se clonó dentro de `~/.engram`
 ```powershell

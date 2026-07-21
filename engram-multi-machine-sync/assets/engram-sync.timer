@@ -1,9 +1,11 @@
 [Unit]
-Description=Correr engram-sync cada 1 hora
+Description=Correr engram-sync (pull+import+export+push) periodicamente
 
 [Timer]
+# Pull+push 2 min despues de encender (traer cambios de otra maquina al iniciar).
 OnBootSec=2min
-OnUnitActiveSec=1h
+# Push periodico corto: reduce la ventana de perdida si se apaga la PC.
+OnUnitActiveSec=10min
 Persistent=true
 
 [Install]

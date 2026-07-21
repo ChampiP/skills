@@ -28,14 +28,21 @@ engram sync --status     # debe mostrar "Pending import: 0"
 ```
 Importa los chunks del repo (idempotente) y mergea con lo local sin duplicar.
 
-## 4. Automatizar cada hora (systemd --user timer; NUNCA cron)
+## 4. Automatizar (systemd --user timer; NUNCA cron)
+Timer = pull al encender (`OnBootSec=2min`) + push cada 10 min (`OnUnitActiveSec=10min`).
+Servicio de apagado = push best-effort al cerrar sesión/apagar (`ExecStop`).
 ```bash
-install -Dm644 assets/engram-sync.service "$HOME/.config/systemd/user/engram-sync.service"
-install -Dm644 assets/engram-sync.timer   "$HOME/.config/systemd/user/engram-sync.timer"
+install -Dm644 assets/engram-sync.service          "$HOME/.config/systemd/user/engram-sync.service"
+install -Dm644 assets/engram-sync.timer            "$HOME/.config/systemd/user/engram-sync.timer"
+install -Dm644 assets/engram-sync-shutdown.service "$HOME/.config/systemd/user/engram-sync-shutdown.service"
 systemctl --user daemon-reload
 systemctl --user enable --now engram-sync.timer
+systemctl --user enable --now engram-sync-shutdown.service
 systemctl --user start engram-sync.service   # corrida de prueba
 ```
+Verificar el push-al-apagar: `systemctl --user stop engram-sync-shutdown.service`
+(corre el sync una vez) y luego `systemctl --user start engram-sync-shutdown.service`
+para rearmarlo. Ver el diseño de tiempos/durabilidad en `references/sync-timing.md`.
 
 ## 5. Blindar el fork de código si engram se clonó dentro de `~/.engram`
 Si `~/.engram` es a la vez un clon del código de Engram, sacá del git el binario y

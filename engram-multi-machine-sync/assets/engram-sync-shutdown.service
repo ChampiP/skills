@@ -1,0 +1,17 @@
+[Unit]
+Description=Engram: push de memoria al apagar/cerrar sesion (best-effort)
+DefaultDependencies=no
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=ENGRAM_DATA_DIR=%h/.engram
+Environment=ENGRAM_SYNC_DIR=%h/.engram-sync
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# ExecStart no hace nada; el push ocurre en ExecStop, al detenerse el servicio (shutdown/logout).
+ExecStart=/bin/true
+ExecStop=%h/.local/bin/engram-sync.sh
+
+[Install]
+WantedBy=default.target
