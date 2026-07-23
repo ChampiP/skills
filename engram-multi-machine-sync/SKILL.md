@@ -26,6 +26,10 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 - NO usar `engram export/import` (JSON) para el sync recurrente: el import NO
   deduplica y DUPLICA la memoria. JSON sólo para backup/recuperación puntual.
 - El SQLite local es la fuente de verdad; el repo de sync es transporte, no dueño.
+- El sync es ADITIVO (upsert por `sync_id`) y NO propaga borrados: no hay "chunk de
+  borrado". Borrar filas de la DB local NO alcanza — los chunks viejos las reinyectan
+  en el próximo import. Para eliminar data de verdad hay que limpiar la DB de CADA
+  máquina Y reconstruir el baseline del repo (ver `references/purge-and-rebaseline.md`).
 - Data-dir (`~/.engram`, la DB) y repo de sync (`~/.engram-sync`, los chunks) van
   SEPARADOS. Nunca cruzarlos.
 - Todo commit de sync debe tener el formato exacto:
@@ -39,6 +43,7 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 | PC Linux/macOS nueva | Seguir `references/setup-linux.md` con `assets/engram-sync.sh` + systemd |
 | PC Windows nueva | Seguir `references/setup-windows.md` con `assets/engram-sync.ps1` + Task Scheduler |
 | `engram sync --status` dice "malformed" | Primero `references/recovery.md`, luego el setup |
+| Hay que borrar data ajena/no deseada (fork con memoria de terceros, purgar proyectos) | `references/purge-and-rebaseline.md`: limpiar DB de cada máquina + reconstruir baseline |
 | Otro repo/otra base | Cambiar `<REPO_SSH>` al clonar; los scripts son env-driven, no tocar |
 | engram no instalado | Instalar según `references/official-docs.md` (brew / `go install`) |
 
@@ -68,6 +73,7 @@ El setup está completo sólo si TODO esto se cumple:
 - `references/setup-windows.md` — setup Windows de cero.
 - `references/sync-timing.md` — cuándo corre el sync, qué se pierde y qué no, y cómo bajar la ventana.
 - `references/recovery.md` — recuperar un `engram.db` corrupto.
+- `references/purge-and-rebaseline.md` — borrar data ajena/no deseada y reconstruir el baseline (sync aditivo no propaga borrados).
 - `references/official-docs.md` — doc oficial de Engram y comandos verificados.
 - `assets/engram-sync.sh`, `assets/engram-sync.ps1` — scripts de sync (genéricos).
 - `assets/engram-sync.service`, `assets/engram-sync.timer`,
