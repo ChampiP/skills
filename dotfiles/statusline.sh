@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export LC_NUMERIC=C   # printf '%.0f' espera punto decimal, no coma (locale es_*)
 input=$(cat)
 
 if command -v jq >/dev/null 2>&1; then
