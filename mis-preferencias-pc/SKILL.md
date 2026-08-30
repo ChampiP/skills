@@ -6,13 +6,33 @@ description: Gustos y preferencias de Brayan para configurar su escritorio Cachy
 # Preferencias de entorno y de colaboración de Brayan
 
 Esta skill resume decisiones **ya tomadas** sobre su PC (CachyOS; escritorio
-principal **Hyprland** desde jul-2026, KDE Plasma 6 como secundario;
-kitty + fish/zsh) para que cualquier sesión futura de Claude Code parta del
-mismo punto, en vez de proponer desde cero cosas que Brayan ya probó y aceptó
-o rechazó. El repo con los archivos de config reales es
-`github.com/ChampiP/kitty` (clonado en `~/git-hub/kitty`) — **esa es la fuente
-de verdad de los archivos**; esta skill es la fuente de verdad de **por qué**
-están así y qué NO volver a proponer.
+principal **Hyprland** desde jul-2026 — **desde ago-2026 sobre distro
+Omarchy**, KDE Plasma 6 quedó como secundario/en transición; kitty + fish/zsh)
+para que cualquier sesión futura de Claude Code parta del mismo punto, en vez
+de proponer desde cero cosas que Brayan ya probó y aceptó o rechazó. El repo
+con los archivos de config reales es `github.com/ChampiP/kitty` (clonado en
+`~/github/kitty`) — **esa es la fuente de verdad de los archivos**; esta
+skill es la fuente de verdad de **por qué** están así y qué NO volver a
+proponer.
+
+**Regla de instalación en PC nueva: TODA la configuración que trae el repo
+`ChampiP/kitty` se instala completa, no solo kitty.conf.** Copiar los 6
+archivos según su propio README ("Cómo restaurar"): `kitty/kitty.conf`,
+`fish/config.fish`, `fish/conf.d/mascot_reaction.fish`,
+`fastfetch/config.jsonc`, `starship/starship.toml`, `zsh/.zshrc`; instalar
+TODAS sus dependencias (`kitty fish fastfetch starship zoxide fzf atuin eza
+bat zsh zsh-autosuggestions` — este último no está en el README pero
+`.zshrc` lo necesita para las autosugerencias, se detectó por prueba y
+error, ver `[[zsh-autosuggestions-faltaba-fix-de-mi-remoci-n-de-cachyos-zsh-config]]`).
+En una distro que no sea CachyOS, `fish/config.fish` y `zsh/.zshrc` traen
+`source /usr/share/cachyos-{fish,zsh}-config/...` que no existe — hay que
+reemplazar esa línea por alias manuales de `eza`/`bat` (el propio README lo
+anticipa) **y además** instalar `zsh-autosuggestions` a mano, porque el
+script de CachyOS también cargaba Oh My Zsh + ese plugin, no solo alias.
+La sección "Otros ajustes del escritorio" del README (Klipper, fail2ban,
+snapper, lazydocker, KDE Connect, ufw) es de la era KDE/CachyOS: revisar cuál
+sigue aplicando en Omarchy antes de instalarla a ciegas, no asumir que
+traduce 1:1.
 
 ## Estética: vivo y saturado, no plano ni pastel
 
