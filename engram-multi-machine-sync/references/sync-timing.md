@@ -8,9 +8,10 @@
 
 ## Cuándo corre el sync (3 disparadores)
 1. **Al iniciar** — trae cambios de la otra máquina antes de trabajar.
-   Linux: timer `OnBootSec=2min`. Windows: tarea `onlogon`.
+   Linux: timer `OnBootSec=2min`. Windows: tarea `EngramSync`, trigger al iniciar sesión.
 2. **Cada 10 min** — push periódico corto (ventana máxima de pérdida ≈ 10 min).
-   Linux: `OnUnitActiveSec=10min`. Windows: tarea `minute /mo 10`.
+   Linux: `OnUnitActiveSec=10min`. Windows: misma tarea, repetición cada 10 min, con
+   batería permitida (por defecto Windows no corre tareas en una laptop desenchufada).
 3. **Al apagar/cerrar sesión** (Linux, best-effort) — servicio con `ExecStop`.
    Windows no tiene equivalente simple; queda cubierto por (2).
 
@@ -27,8 +28,11 @@
 ## Flujo entre dos PCs (por qué converge)
 1. PC-A guarda memoria → push (periódico / al apagar) sube chunks nuevos.
 2. PC-B al iniciar → pull baja esos chunks → `engram sync --import` los mergea (dedup).
-3. Los chunks tienen nombre por hash: dos PCs no colisionan. Si el `manifest.json`
-   choca, gana el remoto y el re-export lo regenera → siempre converge.
+3. Los chunks tienen nombre por hash: dos PCs no colisionan. El `manifest.json` sí puede
+   chocar (push fallido sin red + la otra PC pusheó). NO alcanza con "gana el remoto y el
+   re-export lo regenera": reproducido con dos clones, el chunk local queda huérfano y esa
+   memoria no llega nunca a la otra PC. El script Windows v2 une las entradas de ambos
+   manifests; `engram-sync.sh` todavía usa `-X theirs` (pendiente portar).
 
 ## Si querés cero pérdida real (opcional, no montado)
 Usar **Engram Cloud** (`engram sync --cloud --project <p>` contra `engram cloud serve`)
@@ -38,4 +42,4 @@ ese servidor (self-host docker o VPS). Ver `references/official-docs.md`.
 ## Bajar aún más la ventana
 Editar el intervalo: Linux `OnUnitActiveSec` en `~/.config/systemd/user/engram-sync.timer`
 (luego `systemctl --user daemon-reload && systemctl --user restart engram-sync.timer`);
-Windows recrear `EngramSyncPeriodic` con otro `/mo`.
+Windows re-registrar `EngramSync` con otro `-RepetitionInterval` (`references/setup-windows.md`, paso 4).

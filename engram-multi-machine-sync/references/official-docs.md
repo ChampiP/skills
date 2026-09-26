@@ -23,7 +23,10 @@ Si el repo local no está clonado: `github.com/Gentleman-Programming/engram`.
 - `engram sync --all`            exporta TODA la memoria a chunks en `<cwd>/.engram/`.
 - `engram sync --import --all`   importa chunks de `<cwd>/.engram/` al DB (idempotente).
 - `engram sync --status`         muestra chunks locales/remotos y "Pending import".
-- `engram sync --all --force`    export completo ignorando estado incremental (raro).
+- NO existe `engram sync --force` (verificado con `engram sync --help` en 2.2.1:
+  `usage: engram sync [--import | --status] [--all] [--cloud --project PROJECT]`).
+- `engram sync` sale con código distinto de 0 ante error (el script Windows lo usa para
+  el resultado de la tarea).
 - `engram export <f.json>` / `engram import <f.json>`  dump completo JSON —
   ⚠ el import NO deduplica: duplica memoria si ya existe. Sólo para backup/recuperación,
   NUNCA para el sync recurrente.

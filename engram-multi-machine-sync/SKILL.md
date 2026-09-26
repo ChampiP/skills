@@ -50,6 +50,7 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 | PC Windows nueva | Seguir `references/setup-windows.md` con `assets/engram-sync.ps1` + Task Scheduler |
 | `engram sync --status` dice "malformed" | Primero `references/recovery.md`, luego el setup |
 | Hay que borrar data ajena/no deseada (fork con memoria de terceros, purgar proyectos) | `references/purge-and-rebaseline.md`: limpiar DB de cada máquina + reconstruir baseline |
+| Conflicto en `manifest.json` (push falló sin red y la otra PC pusheó) | Windows v2 une los manifests solo. `engram-sync.sh` usa `-X theirs`: el chunk local queda huérfano y esa memoria no viaja (reproducido); pendiente portar la unión |
 | Otro repo/otra base | Cambiar `<REPO_SSH>` al clonar; los scripts son env-driven, no tocar |
 | engram no instalado | Instalar según `references/official-docs.md` (brew / `go install`) |
 
@@ -71,7 +72,11 @@ El setup está completo sólo si TODO esto se cumple:
 - `PRAGMA integrity_check;` → `ok`.
 - En el repo de sync: `git ls-files | grep engram.db` → vacío (0 binario en git).
 - Scheduler activo (Linux `systemctl --user is-active engram-sync.timer` → `active`;
-  Windows `schtasks /query /tn EngramSync`).
+  Windows `Start-ScheduledTask EngramSync` y luego
+  `(Get-ScheduledTaskInfo EngramSync).LastTaskResult` → `0`).
+- Windows: `%LOCALAPPDATA%\engram-sync\engram-sync.log` termina en `---- ok`.
+- Conteos tras import desde cero: prompts = manifest; observaciones = manifest menos las
+  soft-deleted; sesiones quedan por debajo (las vacías no entran, esperado).
 - Último commit del repo con formato `sync: <host> <dd-MM-yyyy HH:MM:SS>`.
 
 ## References
