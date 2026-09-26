@@ -26,10 +26,16 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 - NO usar `engram export/import` (JSON) para el sync recurrente: el import NO
   deduplica y DUPLICA la memoria. JSON sólo para backup/recuperación puntual.
 - El SQLite local es la fuente de verdad; el repo de sync es transporte, no dueño.
-- El sync es ADITIVO (upsert por `sync_id`) y NO propaga borrados: no hay "chunk de
-  borrado". Borrar filas de la DB local NO alcanza — los chunks viejos las reinyectan
-  en el próximo import. Para eliminar data de verdad hay que limpiar la DB de CADA
-  máquina Y reconstruir el baseline del repo (ver `references/purge-and-rebaseline.md`).
+- Todas las máquinas en engram >= 2.1.0 (exporta lápidas de borrado por entidad).
+- Qué borrados viajan (verificado en 2.2.1):
+  | Borrado | ¿Se propaga? |
+  |---|---|
+  | `engram delete <obs_id>` (soft) | Sí (`deleted_at` en el chunk) |
+  | `engram delete prompt`, `delete <obs_id> --hard`, `delete session` | Sí (lápida) |
+  | `engram delete project [--hard]` | NO: no deja lápida |
+  | SQL crudo (`UPDATE`/`DELETE`) | NUNCA |
+- Tras `engram delete project` o cualquier SQL crudo, reconstruir el baseline del repo
+  (`references/purge-and-rebaseline.md`, pata B); si no, un import desde cero lo resucita.
 - Data-dir (`~/.engram`, la DB) y repo de sync (`~/.engram-sync`, los chunks) van
   SEPARADOS. Nunca cruzarlos.
 - Todo commit de sync debe tener el formato exacto:

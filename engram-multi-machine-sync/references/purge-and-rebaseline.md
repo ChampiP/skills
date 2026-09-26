@@ -6,8 +6,10 @@ local **no alcanza**: vuelven en el próximo import.
 
 ## Por qué vuelven (la causa raíz)
 
-El sync por chunks es **ADITIVO**: importa haciendo *upsert por `sync_id`* y **no
-propaga borrados**. No existe un "chunk de borrado". Entonces:
+El sync por chunks es **ADITIVO**: importa haciendo *upsert por `sync_id`*. Desde
+engram 2.1.0 exporta lápidas de los borrados por entidad (`delete prompt`,
+`delete <obs> --hard`, `delete session`), pero **`engram delete project` no deja
+lápida** (verificado en 2.2.1) y el SQL crudo nunca. Para esos casos:
 
 - Si borrás filas de `engram.db` (peor aún con SQL crudo, que además saltea el journal
   de sync), los chunks viejos del repo **siguen conteniendo** esa data.
@@ -90,7 +92,15 @@ OJO: no cuentes menciones sueltas del nombre en `content`/`title` — los prompt
 memorias del propio usuario pueden nombrar lo ajeno legítimamente (ej. "borrá lo de X").
 Sólo los campos `"project":"..."` / `directory` estructurados son basura real.
 
-Aplastar historia (para que la data ajena tampoco quede en `git log`) y force-push:
+Opción simple (suficiente para que ninguna máquina reimporte la basura, porque el
+import lee solo los chunks actuales del manifest): commit normal y push, sin force.
+```bash
+cd "$R" && git add -A .engram
+git commit -q -m "sync: $(hostname) $(TZ=America/Lima date +%d-%m-%Y\ %H:%M:%S)" && git push -q origin main
+```
+
+Opción completa, solo si la data tampoco debe quedar en `git log` (ajena o sensible):
+aplastar historia y force-push:
 ```bash
 cd "$R"
 git checkout --orphan clean-baseline -q
