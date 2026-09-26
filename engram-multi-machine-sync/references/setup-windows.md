@@ -103,6 +103,14 @@ dos clones y dos DBs aisladas:
 - Merge commits con el formato `sync: <host> <fecha Lima>` (la v1 dejaba el mensaje
   por defecto de git).
 - Consola en UTF-8 para que el log no salga con mojibake.
+- **Notificación toast** (🧠) solo cuando de verdad se subió memoria nueva al repo
+  (nunca en una corrida sin cambios): resume sesiones/observaciones/prompts subidos,
+  sumando los chunks que el manifest local ganó en esta corrida (comparación
+  antes/después de `engram sync --all`, no parseo de texto del CLI). Usa la API
+  nativa `Windows.UI.Notifications` (sin instalar nada); si falla, queda en el log
+  y el exit code del sync no se ve afectado. El emoji se arma con
+  `[char]::ConvertFromUtf32(0x1F9E0)` (codepoint, no el carácter literal) para no
+  depender de que el `.ps1` tenga BOM al leerlo Windows PowerShell 5.1.
 
 ## 6. Blindar si engram se clonó dentro de `~/.engram`
 ```powershell

@@ -33,6 +33,31 @@ function Write-Log([string]$Msg) {
 
 function Stop-Sync([string]$Msg) { Write-Log "ERROR: $Msg"; exit 1 }
 
+# Toast nativo de Windows. Solo se llama cuando de verdad se subio memoria nueva al
+# repo (no en cada corrida de 10 min sin cambios). Si la API no esta disponible
+# (falla, versionde Windows vieja) queda en el log, nunca rompe el exit code del sync.
+function Send-SyncToast([string]$Body) {
+  try {
+    Add-Type -AssemblyName System.Runtime.WindowsRuntime -ErrorAction Stop | Out-Null
+    [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+    $brain = [char]::ConvertFromUtf32(0x1F9E0)   # codepoint, no el emoji literal: evita mojibake si el .ps1 se lee sin BOM
+    $xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+    $nodes = $xml.GetElementsByTagName('text')
+    $nodes.Item(0).AppendChild($xml.CreateTextNode("$brain Engram sync")) | Out-Null
+    $nodes.Item(1).AppendChild($xml.CreateTextNode($Body)) | Out-Null
+    $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('PowerShell').Show($toast)
+  } catch {
+    Write-Log "WARN: no se pudo mostrar la notificacion: $($_.Exception.Message)"
+  }
+}
+
+# Chunks del manifest local ahora mismo, para comparar antes/despues del export.
+function Get-ManifestChunks {
+  if (-not (Test-Path $Manifest)) { return @() }
+  @((Get-Content $Manifest -Raw | ConvertFrom-Json).chunks)
+}
+
 # Corre un comando nativo, loguea su salida (stdout+stderr) y devuelve el exit code.
 function Invoke-Logged([string]$Exe, [string[]]$Arguments) {
   $ErrorActionPreference = 'Continue'   # en PS 5.1 el stderr de un nativo con 'Stop' aborta
@@ -102,7 +127,10 @@ try {
 
   # 2. Importar chunks remotos (idempotente) y 3. exportar memorias locales nuevas.
   if ((Invoke-Logged engram @('sync', '--import', '--all')) -ne 0) { Stop-Sync 'engram sync --import --all fallo' }
+  $chunksBefore = @{}
+  foreach ($c in (Get-ManifestChunks)) { $chunksBefore[$c.id] = $true }
   if ((Invoke-Logged engram @('sync', '--all')) -ne 0) { Stop-Sync 'engram sync --all fallo' }
+  $newChunks = @(Get-ManifestChunks | Where-Object { -not $chunksBefore.ContainsKey($_.id) })
   git add -- .engram
   git diff --cached --quiet
   if ($LASTEXITCODE -ne 0) {
@@ -111,10 +139,11 @@ try {
 
   # 4. Push si hay commits locales (incluye los que quedaron de una corrida sin red).
   #    Si otra PC pusheo en el medio: fetch + merge + reintento.
+  $pushed = $false
   foreach ($try in 1..2) {
     $ahead = [int](git rev-list --count origin/main..HEAD)
     if ($ahead -eq 0) { break }
-    if ((Invoke-Logged git @('push', '-q', 'origin', 'HEAD:main')) -eq 0) { break }
+    if ((Invoke-Logged git @('push', '-q', 'origin', 'HEAD:main')) -eq 0) { $pushed = $true; break }
     if ($try -eq 2) { Stop-Sync 'git push fallo 2 veces; los commits quedan locales para la proxima corrida' }
     if ((Invoke-Logged git @('fetch', '-q', 'origin', 'main')) -ne 0) { Stop-Sync 'git fetch fallo (red o SSH)' }
     Merge-Remote
@@ -123,6 +152,15 @@ try {
 
   # 5. Verificacion desde afuera: el status debe leer el manifest sin error y sin pendientes.
   if ((Invoke-Logged engram @('sync', '--status')) -ne 0) { Stop-Sync 'engram sync --status fallo' }
+
+  # Notificacion SOLO si de verdad se subio memoria nueva al repo (no en corridas vacias).
+  if ($pushed -and $newChunks.Count -gt 0) {
+    $sessions = ($newChunks | Measure-Object -Property sessions -Sum).Sum
+    $obs      = ($newChunks | Measure-Object -Property memories -Sum).Sum
+    $prompts  = ($newChunks | Measure-Object -Property prompts  -Sum).Sum
+    Send-SyncToast "Subido: $sessions sesiones, $obs observaciones, $prompts prompts"
+  }
+
   Write-Log '---- ok'
   exit 0
 } finally {
