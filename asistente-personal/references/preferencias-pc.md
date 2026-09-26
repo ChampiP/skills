@@ -1,19 +1,13 @@
----
-name: mis-preferencias-pc
-description: Gustos y preferencias de Brayan para configurar su escritorio CachyOS/KDE Plasma, terminal (kitty/fish/zsh) y automatizaciones — basado en decisiones reales que tomó durante varias sesiones de configuración. Úsalo SIEMPRE que Brayan pida mejorar/cambiar/personalizar su terminal, su escritorio, atajos, temas de color, prompt, o automatizaciones del sistema, para no repetir cosas que ya rechazó explícitamente ni reinventar lo que ya tiene funcionando. También sirve como referencia de "cómo le gusta trabajar conmigo" (forma de preguntar, nivel de autonomía, honestidad ante límites técnicos).
----
-
 # Preferencias de entorno y de colaboración de Brayan
 
-Esta skill resume decisiones **ya tomadas** sobre su PC (CachyOS; escritorio
-principal **Hyprland** desde jul-2026 — **desde ago-2026 sobre distro
-Omarchy**, KDE Plasma 6 quedó como secundario/en transición; kitty + fish/zsh)
-para que cualquier sesión futura de Claude Code parta del mismo punto, en vez
-de proponer desde cero cosas que Brayan ya probó y aceptó o rechazó. El repo
-con los archivos de config reales es `github.com/ChampiP/kitty` (clonado en
-`~/github/kitty`) — **esa es la fuente de verdad de los archivos**; esta
-skill es la fuente de verdad de **por qué** están así y qué NO volver a
-proponer.
+Decisiones **ya tomadas** sobre su PC (Linux: Hyprland desde jul-2026, sobre
+distro **Omarchy** desde ago-2026; antes CachyOS/KDE Plasma; kitty + fish/zsh)
+para no proponer desde cero cosas que ya probó y aceptó o rechazó. Los
+archivos de config reales viven en `github.com/ChampiP/kitty` (clonado en
+`~/Work/kitty`) — **fuente de verdad de los archivos**; este documento es la
+fuente de verdad de **por qué** están así y qué NO volver a proponer.
+Secciones marcadas KDE/CachyOS son históricas: verificar si aplican en la
+máquina actual antes de usarlas.
 
 **Regla de instalación en PC nueva: TODA la configuración que trae el repo
 `ChampiP/kitty` se instala completa, no solo kitty.conf.** Copiar los 6
@@ -92,7 +86,7 @@ que lo pida de nuevo.
 - **Automatizaciones de sistema** (`systemd --user timers`, nunca cron —
   no está instalado): scripts de ObsiNotes corriendo solos (sync de Notion,
   transcripción, clasificación de Kanban, aviso de tareas pendientes al
-  iniciar sesión). Ver `~/git-hub/obsidian/ObsiNotes/AGENTS.md`.
+  iniciar sesión). Ver `~/Work/ObsiNotes/AGENTS.md`.
 - **Seguridad/mantenimiento del sistema**: fail2ban en sshd, snapshots
   automáticos de snapper (timeline + los que ya dispara `snap-pac` en cada
   update de pacman), firewall ufw activo (solo 22 y 1714-1764 abiertos).

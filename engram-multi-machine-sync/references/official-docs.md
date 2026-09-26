@@ -4,11 +4,11 @@ No inventar comandos ni flags: consultar estos archivos del repo de Engram.
 Si el repo local no está clonado: `github.com/Gentleman-Programming/engram`.
 
 - Instalación (brew, `go install`, binarios, Windows, env vars):
-  `~/git-hub/engram/docs/INSTALLATION.md`
+  `~/Work/engram/docs/INSTALLATION.md`
 - Sync por chunks y cloud (mecanismo, guardrails, idempotencia):
-  `~/git-hub/engram/docs/codebase/sync-and-cloud.md`
+  `~/Work/engram/docs/codebase/sync-and-cloud.md`
 - Setup de agentes (Claude Code, Cursor, etc.):
-  `~/git-hub/engram/docs/AGENT-SETUP.md`
+  `~/Work/engram/docs/AGENT-SETUP.md`
 
 ## Hechos oficiales clave (confirmados en la doc)
 - `ENGRAM_DATA_DIR` default `~/.engram` (Windows `%USERPROFILE%\.engram`); DB en `.engram/engram.db`.
