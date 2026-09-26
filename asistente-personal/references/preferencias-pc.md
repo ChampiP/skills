@@ -96,6 +96,15 @@ que lo pida de nuevo.
 - **KDE Connect**: instalado; falta emparejar el celular (posible bloqueo
   por aislamiento de clientes AP en el router — fuera del control del PC).
 
+## Windows (laptop) — desde sep-2026
+
+- **`Win+Enter`** abre Windows Terminal con PowerShell 7 en `$HOME\Work`
+  (misma memoria muscular que `Super+Enter` en Hyprland). Implementado con
+  **AutoHotkey v2** (`~/Work/skills/dotfiles/hotkeys.ahk`, arranca desde
+  `shell:startup`). Eligió AutoHotkey sobre PowerToys por liviano y
+  versionable; nuevos atajos globales de Windows van en ese mismo `.ahk`.
+  Un acceso directo `.lnk` NO sirve: solo acepta `Ctrl+Alt+tecla`, no `Win`.
+
 ## Hyprland — su escritorio principal (desde jul-2026)
 
 Brayan **se pasó a Hyprland** como escritorio principal (mantiene KDE Plasma

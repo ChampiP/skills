@@ -79,6 +79,18 @@ Pi/gentle-shell solo carga skills de proyecto si la carpeta es confiable: abrir 
 - Engram en la raíz Work: `cd ~/Work && engram init work` (sin esto responde "ambiguous project" por los muchos repos hijos).
 - Statusline de Claude Code: copiar `~/Work/skills/dotfiles/statusline.sh` a `~/.claude/statusline.sh` y en `~/.claude/settings.json` poner `"statusLine": {"type": "command", "command": "bash ~/.claude/statusline.sh"}`.
 - Sync de Engram: seguir `~/Work/skills/engram-multi-machine-sync/SKILL.md`.
+- Atajos globales Windows (`Win+Enter` = Windows Terminal con PowerShell 7 en `$HOME\Work`, como `Super+Enter` en Hyprland). Instalar AutoHotkey v2 y registrar `dotfiles\hotkeys.ahk` al inicio de sesión:
+
+  ```powershell
+  winget install --id AutoHotkey.AutoHotkey -e --scope user --accept-package-agreements --accept-source-agreements
+  $ahk = "$env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe"
+  $script = "$HOME\Work\skills\dotfiles\hotkeys.ahk"
+  $s = (New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path ([Environment]::GetFolderPath('Startup')) 'hotkeys.lnk'))
+  $s.TargetPath = $ahk; $s.Arguments = "`"$script`""; $s.WorkingDirectory = "$HOME\Work"; $s.Save()
+  Start-Process $ahk -ArgumentList "`"$script`""
+  ```
+
+  Probar desde otro script AHK requiere `SendLevel(1)` antes de `Send("#{Enter}")`; sin eso AutoHotkey ignora teclas enviadas por otro script y parece que el atajo no funciona.
 
 ## 6. Verificación
 
