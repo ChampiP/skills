@@ -58,6 +58,15 @@ function Get-ManifestChunks {
   @((Get-Content $Manifest -Raw | ConvertFrom-Json).chunks)
 }
 
+# Chunks del manifest que no estaban en $KnownIds (hashtable id->true). Actualiza
+# $KnownIds con los nuevos. Se usa para detectar lo que trajo cada merge remoto,
+# sin importar si el merge fue el inicial o uno de reintento tras un push fallido.
+function Get-NewChunksAndMark([hashtable]$KnownIds) {
+  $new = @(Get-ManifestChunks | Where-Object { -not $KnownIds.ContainsKey($_.id) })
+  foreach ($c in $new) { $KnownIds[$c.id] = $true }
+  return $new
+}
+
 # Corre un comando nativo, loguea su salida (stdout+stderr) y devuelve el exit code.
 function Invoke-Logged([string]$Exe, [string[]]$Arguments) {
   $ErrorActionPreference = 'Continue'   # en PS 5.1 el stderr de un nativo con 'Stop' aborta
@@ -120,17 +129,23 @@ try {
   Set-Location $SyncDir
   if ((Invoke-Logged git @('rev-parse', '--is-inside-work-tree')) -ne 0) { Stop-Sync "$SyncDir no es un repo git" }
 
+  # Todo chunk que ya conocemos antes de tocar la red, para poder distinguir despues
+  # "esto lo trajo el merge remoto" de "esto lo generamos nosotros al exportar".
+  $knownChunkIds = @{}
+  foreach ($c in (Get-ManifestChunks)) { $knownChunkIds[$c.id] = $true }
+  $pulledChunks = @()
+
   # 1. Traer chunks remotos. Sin red se sigue: el export/commit local queda listo para
   #    la proxima corrida y la corrida termina con exit 1 en el push.
-  if ((Invoke-Logged git @('fetch', '-q', 'origin', 'main')) -eq 0) { Merge-Remote }
-  else { Write-Log 'WARN: git fetch fallo (red o SSH); sigo con export local' }
+  if ((Invoke-Logged git @('fetch', '-q', 'origin', 'main')) -eq 0) {
+    Merge-Remote
+    $pulledChunks += @(Get-NewChunksAndMark $knownChunkIds)
+  } else { Write-Log 'WARN: git fetch fallo (red o SSH); sigo con export local' }
 
   # 2. Importar chunks remotos (idempotente) y 3. exportar memorias locales nuevas.
   if ((Invoke-Logged engram @('sync', '--import', '--all')) -ne 0) { Stop-Sync 'engram sync --import --all fallo' }
-  $chunksBefore = @{}
-  foreach ($c in (Get-ManifestChunks)) { $chunksBefore[$c.id] = $true }
   if ((Invoke-Logged engram @('sync', '--all')) -ne 0) { Stop-Sync 'engram sync --all fallo' }
-  $newChunks = @(Get-ManifestChunks | Where-Object { -not $chunksBefore.ContainsKey($_.id) })
+  $newChunks = @(Get-NewChunksAndMark $knownChunkIds)
   git add -- .engram
   git diff --cached --quiet
   if ($LASTEXITCODE -ne 0) {
@@ -147,13 +162,23 @@ try {
     if ($try -eq 2) { Stop-Sync 'git push fallo 2 veces; los commits quedan locales para la proxima corrida' }
     if ((Invoke-Logged git @('fetch', '-q', 'origin', 'main')) -ne 0) { Stop-Sync 'git fetch fallo (red o SSH)' }
     Merge-Remote
+    $pulledChunks += @(Get-NewChunksAndMark $knownChunkIds)
     if ((Invoke-Logged engram @('sync', '--import', '--all')) -ne 0) { Stop-Sync 'engram sync --import --all fallo' }
   }
 
   # 5. Verificacion desde afuera: el status debe leer el manifest sin error y sin pendientes.
   if ((Invoke-Logged engram @('sync', '--status')) -ne 0) { Stop-Sync 'engram sync --status fallo' }
 
-  # Notificacion SOLO si de verdad se subio memoria nueva al repo (no en corridas vacias).
+  # Notificaciones: independientes entre si. La de pull avisa apenas trajo algo nuevo
+  # del remoto (login o cualquier tick de 10 min); no depende de si esta corrida
+  # tambien tuvo algo propio para subir.
+  if ($pulledChunks.Count -gt 0) {
+    $sessions = ($pulledChunks | Measure-Object -Property sessions -Sum).Sum
+    $obs      = ($pulledChunks | Measure-Object -Property memories -Sum).Sum
+    $prompts  = ($pulledChunks | Measure-Object -Property prompts  -Sum).Sum
+    Send-SyncToast "Bajado: $sessions sesiones, $obs observaciones, $prompts prompts"
+  }
+  # La de push SOLO si de verdad se subio memoria nueva al repo (no en corridas vacias).
   if ($pushed -and $newChunks.Count -gt 0) {
     $sessions = ($newChunks | Measure-Object -Property sessions -Sum).Sum
     $obs      = ($newChunks | Measure-Object -Property memories -Sum).Sum

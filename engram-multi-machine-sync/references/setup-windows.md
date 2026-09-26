@@ -103,14 +103,27 @@ dos clones y dos DBs aisladas:
 - Merge commits con el formato `sync: <host> <fecha Lima>` (la v1 dejaba el mensaje
   por defecto de git).
 - Consola en UTF-8 para que el log no salga con mojibake.
-- **Notificación toast** (🧠) solo cuando de verdad se subió memoria nueva al repo
-  (nunca en una corrida sin cambios): resume sesiones/observaciones/prompts subidos,
-  sumando los chunks que el manifest local ganó en esta corrida (comparación
-  antes/después de `engram sync --all`, no parseo de texto del CLI). Usa la API
-  nativa `Windows.UI.Notifications` (sin instalar nada); si falla, queda en el log
-  y el exit code del sync no se ve afectado. El emoji se arma con
+- **Notificaciones toast** (🧠), dos independientes entre sí, cada una solo cuando
+  de verdad pasó algo (nunca en una corrida sin cambios), en login o en cualquier
+  tick de 10 min:
+  - **"Bajado: ..."** apenas el fetch/merge trae chunks nuevos de otra PC, se
+    hayan podido subir cambios propios o no en esa misma corrida.
+  - **"Subido: ..."** solo si esta corrida exportó memoria propia y el push a
+    GitHub salió bien.
+  Ambas resumen sesiones/observaciones/prompts sumando los chunks que el manifest
+  ganó en esa corrida (comparación antes/después contra un set acumulado de ids
+  ya conocidos, no parseo de texto del CLI). Usa la API nativa
+  `Windows.UI.Notifications` (sin instalar nada); si falla, queda en el log y el
+  exit code del sync no se ve afectado. El emoji se arma con
   `[char]::ConvertFromUtf32(0x1F9E0)` (codepoint, no el carácter literal) para no
   depender de que el `.ps1` tenga BOM al leerlo Windows PowerShell 5.1.
+  **Bug real encontrado y corregido probando esto**: una función de PowerShell que
+  devuelve un array de **un solo elemento** lo desenrolla a un objeto suelto (sin
+  `.Count`) al asignarlo con `$x = Get-Algo`; con 0 o 2+ elementos sí llega como
+  array. Se reprodujo en el entorno aislado (el toast de "Subido" nunca sonaba
+  con exactamente 1 chunk nuevo) y se corrigió envolviendo cada asignación con
+  `@(...)`: `$newChunks = @(Get-NewChunksAndMark $knownChunkIds)`.
+  Recordar esto en cualquier función nueva de este script que devuelva una lista.
 
 ## 6. Blindar si engram se clonó dentro de `~/.engram`
 ```powershell

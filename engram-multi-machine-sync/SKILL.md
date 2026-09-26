@@ -51,7 +51,7 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 | `engram sync --status` dice "malformed" | Primero `references/recovery.md`, luego el setup |
 | Hay que borrar data ajena/no deseada (fork con memoria de terceros, purgar proyectos) | `references/purge-and-rebaseline.md`: limpiar DB de cada máquina + reconstruir baseline |
 | Conflicto en `manifest.json` (push falló sin red y la otra PC pusheó) | Windows v2 une los manifests solo. `engram-sync.sh` usa `-X theirs`: el chunk local queda huérfano y esa memoria no viaja (reproducido); pendiente portar la unión |
-| Notificación al subir memoria nueva | Windows v2 ya la tiene (toast nativo 🧠, solo cuando hubo push real). Pendiente portar a `engram-sync.sh` con `notify-send` (Brayan ya usa mako en Hyprland), misma condición: solo si hubo chunks nuevos y el push salió bien |
+| Notificación al subir o bajar memoria | Windows v2 ya tiene dos toasts nativos 🧠 independientes: "Bajado" (merge trajo chunks nuevos) y "Subido" (push propio salió bien), cada uno solo cuando de verdad pasó algo. Pendiente portar a `engram-sync.sh` con `notify-send` (Brayan ya usa mako en Hyprland), mismas dos condiciones por separado |
 | Otro repo/otra base | Cambiar `<REPO_SSH>` al clonar; los scripts son env-driven, no tocar |
 | engram no instalado | Instalar según `references/official-docs.md` (brew / `go install`) |
 
