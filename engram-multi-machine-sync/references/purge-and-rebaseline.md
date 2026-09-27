@@ -111,10 +111,11 @@ git push -f origin main
 systemctl --user start engram-sync.timer
 systemctl --user start engram-sync.service         # 1 corrida de prueba: la DB NO debe cambiar
 ```
-Linux (`engram-sync.sh`, con `-X theirs`/`reset --hard`) adopta la historia reescrita sola
-en su próximo sync. Windows (`engram-sync.ps1` v2) NO descarta commits locales: ante la
-historia reescrita el merge falla, la corrida sale con exit 1 y el log lo dice (verificado).
-Esa PC se alinea con la pata C, que hace el `git reset --hard origin/main` a mano.
+Ningún script (`engram-sync.sh` ni `engram-sync.ps1` v2) descarta commits locales: ante la
+historia reescrita el merge falla ("unrelated histories"), la corrida sale con exit 1 y el
+log lo dice (verificado en los dos OS), sin tocar el estado local. Cada otra PC se alinea con
+la pata C, que hace el `git reset --hard origin/main` a mano. Ese reset descarta los commits
+sin pushear de esa PC: lo que tenían queda solo en su DB (o en el backup de la pata C).
 
 ## C. Cada OTRA máquina debe limpiar su DB también
 
@@ -132,6 +133,16 @@ para la PC pendiente (ej. Windows):
   powershell -NoProfile -File "$HOME\.local\bin\engram-sync.ps1"   # import trae SOLO lo limpio
   engram sync --status
   Enable-ScheduledTask -TaskName EngramSync | Out-Null
+  ```
+  Linux equivalente:
+  ```bash
+  systemctl --user stop engram-sync.timer
+  # cerrar engram serve/mcp si están corriendo (Claude Code levanta `engram mcp`)
+  bak="$HOME/.engram/backup-$(TZ=America/Lima date +%Y%m%d-%H%M)"
+  mkdir -p "$bak" && mv "$HOME"/.engram/engram.db* "$bak"/   # backup, no borrar
+  cd "$HOME/.engram-sync" && git fetch origin main && git reset --hard origin/main
+  "$HOME/.local/bin/engram-sync.sh"                            # import trae SOLO lo limpio
+  systemctl --user start engram-sync.timer
   ```
 - **Quirúrgico:** repetir la pata A (mismo SQL/CLI) en esa máquina. Más trabajo, sin ventaja.
 

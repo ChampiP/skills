@@ -31,8 +31,10 @@
 3. Los chunks tienen nombre por hash: dos PCs no colisionan. El `manifest.json` sí puede
    chocar (push fallido sin red + la otra PC pusheó). NO alcanza con "gana el remoto y el
    re-export lo regenera": reproducido con dos clones, el chunk local queda huérfano y esa
-   memoria no llega nunca a la otra PC. El script Windows v2 une las entradas de ambos
-   manifests; `engram-sync.sh` todavía usa `-X theirs` (pendiente portar).
+   memoria no llega nunca a la otra PC. Los dos scripts (`engram-sync.sh` y
+   `engram-sync.ps1` v2) unen las entradas de ambos manifests por `id`.
+4. Sin red, el script igual importa, exporta y commitea local (sale con exit 1); el push
+   pendiente sale en la próxima corrida con red, con fetch+merge si la otra PC pusheó.
 
 ## Si querés cero pérdida real (opcional, no montado)
 Usar **Engram Cloud** (`engram sync --cloud --project <p>` contra `engram cloud serve`)

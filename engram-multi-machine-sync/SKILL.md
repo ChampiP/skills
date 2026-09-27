@@ -50,8 +50,9 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 | PC Windows nueva | Seguir `references/setup-windows.md` con `assets/engram-sync.ps1` + Task Scheduler |
 | `engram sync --status` dice "malformed" | Primero `references/recovery.md`, luego el setup |
 | Hay que borrar data ajena/no deseada (fork con memoria de terceros, purgar proyectos) | `references/purge-and-rebaseline.md`: limpiar DB de cada máquina + reconstruir baseline |
-| Conflicto en `manifest.json` (push falló sin red y la otra PC pusheó) | Windows v2 une los manifests solo. `engram-sync.sh` usa `-X theirs`: el chunk local queda huérfano y esa memoria no viaja (reproducido); pendiente portar la unión |
-| Notificación al subir o bajar memoria | Windows v2 ya tiene dos toasts nativos 🧠 independientes: "Bajado" (merge trajo chunks nuevos) y "Subido" (push propio salió bien), cada uno solo cuando de verdad pasó algo. Pendiente portar a `engram-sync.sh` con `notify-send` (Brayan ya usa mako en Hyprland), mismas dos condiciones por separado |
+| Conflicto en `manifest.json` (push falló sin red y la otra PC pusheó) | Los dos scripts (`engram-sync.sh` y `engram-sync.ps1` v2) unen las entradas de chunks por `id` solos. Nunca `-X theirs` ni `reset --hard`: dejaban el chunk local huérfano y esa memoria no viajaba (reproducido en ambos OS) |
+| Notificación al subir o bajar memoria | Dos avisos 🧠 independientes, cada uno solo cuando de verdad pasó algo: "Bajado" (el merge trajo chunks nuevos) y "Subido" (el push salió bien y subió chunks). Linux: `notify-send` (mako en Hyprland); Windows: toast nativo |
+| El sync sale con exit 1 | Leer el log (Linux `journalctl --user -u engram-sync`, Windows `engram-sync.log`). Sin red es esperado: el commit queda local y sale en la próxima corrida. Historia reescrita (force-push) → pata C de `references/purge-and-rebaseline.md` |
 | Otro repo/otra base | Cambiar `<REPO_SSH>` al clonar; los scripts son env-driven, no tocar |
 | engram no instalado | Instalar según `references/official-docs.md` (brew / `go install`) |
 
@@ -67,7 +68,7 @@ migrar la memoria a otra máquina/repo. No usar para cambios de código de Engra
 
 ## Output Contract
 El setup está completo sólo si TODO esto se cumple:
-- `engram sync --status` → sin errores y `Pending import: 0`.
+- `engram sync --status` (desde el repo de sync: lee `./.engram`) → sin errores y `Pending import: 0`.
 - Correr el script 2 veces seguidas → el conteo de observaciones NO cambia
   (`sqlite3 ~/.engram/engram.db 'SELECT count(*) FROM observations;'`): no duplica.
 - `PRAGMA integrity_check;` → `ok`.
@@ -75,6 +76,8 @@ El setup está completo sólo si TODO esto se cumple:
 - Scheduler activo (Linux `systemctl --user is-active engram-sync.timer` → `active`;
   Windows `Start-ScheduledTask EngramSync` y luego
   `(Get-ScheduledTaskInfo EngramSync).LastTaskResult` → `0`).
+- Linux: `systemctl --user status engram-sync` muestra el log de la última corrida
+  terminando en `---- ok` (completo en `journalctl --user -u engram-sync`).
 - Windows: `%LOCALAPPDATA%\engram-sync\engram-sync.log` termina en `---- ok`.
 - Conteos tras import desde cero: prompts = manifest; observaciones = manifest menos las
   soft-deleted; sesiones quedan por debajo (las vacías no entran, esperado).
