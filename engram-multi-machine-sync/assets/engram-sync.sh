@@ -93,6 +93,8 @@ merge_remote() {
   fi
 }
 
+# Without this check a missing flock (e.g. stock macOS) would look like "another run" and exit 0.
+command -v flock >/dev/null || die "flock not in PATH (util-linux; macOS: brew install flock)"
 exec 9>"${XDG_RUNTIME_DIR:-/tmp}/engram-sync.lock" || die "cannot open lock file"
 flock -n 9 || { echo "another run in progress; exiting"; exit 0; }
 

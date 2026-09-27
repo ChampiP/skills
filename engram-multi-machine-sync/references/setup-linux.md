@@ -7,7 +7,8 @@ base nueva o para sumar una máquina a un repo de memoria ya existente.
 ## 0. Pre-requisitos
 - `engram` instalado y en PATH — ver `references/official-docs.md` (Homebrew o `go install`).
 - `git` con acceso SSH al repo privado de sync.
-- `jq` (une el `manifest.json`) y `flock` (util-linux). Opcional: `notify-send`
+- `jq` (une el `manifest.json`) y `flock` (util-linux; macOS: `brew install flock`). Si falta
+  alguno, el script sale con exit 1. Opcional: `notify-send`
   (libnotify) + un daemon de notificaciones (mako en Hyprland) para los avisos.
 - Verificar: `engram --help`, `jq --version` y `git ls-remote <REPO_SSH>` responden.
 
